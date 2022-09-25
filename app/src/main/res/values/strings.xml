@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ShoppingListApp</string>
+    <string name="invalid_name">Invalid name</string>
+    <string name="invalid_count">Invalid count</string>
+</resources>

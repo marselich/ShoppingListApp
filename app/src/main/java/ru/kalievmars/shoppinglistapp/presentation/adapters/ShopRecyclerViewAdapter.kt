@@ -6,11 +6,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kalievmars.shoppinglistapp.R
+import ru.kalievmars.shoppinglistapp.databinding.ItemShopDisabledBinding
+import ru.kalievmars.shoppinglistapp.databinding.ItemShopEnabledBinding
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
 import ru.kalievmars.shoppinglistapp.presentation.utils.ShopItemDiffCallback
 import ru.kalievmars.shoppinglistapp.presentation.utils.ShopListDiffCallback
@@ -39,27 +43,41 @@ class ShopRecyclerViewAdapter : ListAdapter<ShopItem, ShopItemViewHolder>(ShopIt
             else -> throw RuntimeException("Unknown view type: $viewType")
         }
 
-        val view = LayoutInflater.from(parent.context).inflate(
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context),
             layout,
             parent,
             false
         )
-        return ShopItemViewHolder(view)
+
+//        val view = LayoutInflater.from(parent.context).inflate(
+//            layout,
+//            parent,
+//            false
+//        )
+        return ShopItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         val shopItem = getItem(position)
+        val binding = holder.binding
 
-        holder.nameText.text = shopItem.name
-        holder.countText.text = shopItem.count.toString()
-
-        holder.itemView.setOnLongClickListener {
+        binding.root.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
         }
 
-        holder.itemView.setOnClickListener {
+        binding.root.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
+        }
+
+        when(binding) {
+            is ItemShopDisabledBinding -> {
+                binding.shopItem = shopItem
+            }
+            is ItemShopEnabledBinding -> {
+                binding.shopItem = shopItem
+            }
         }
     }
 

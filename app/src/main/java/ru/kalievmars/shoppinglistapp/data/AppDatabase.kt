@@ -1,7 +1,6 @@
 package ru.kalievmars.shoppinglistapp.data
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,28 +14,26 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getShopListDao(): ShopListDao
 
+    @InternalCoroutinesApi
     companion object {
 
         private var INSTANCE: AppDatabase? = null
         private val lock = Any()
         private const val DATABASE_NAME = "shop_list.db"
 
-        @OptIn(InternalCoroutinesApi::class)
         fun getInstance(application: Application): AppDatabase {
             INSTANCE?.let {
-                INSTANCE = it
+                return it
             }
             synchronized(lock) {
                 INSTANCE?.let {
-                    INSTANCE = it
+                    return it
                 }
                 val db = Room.databaseBuilder(
                     application,
                     AppDatabase::class.java,
                     DATABASE_NAME
-                )
-                    .allowMainThreadQueries()
-                    .build()
+                ).build()
                 INSTANCE = db
                 return db
             }

@@ -16,6 +16,7 @@ import ru.kalievmars.shoppinglistapp.R
 import ru.kalievmars.shoppinglistapp.databinding.FragmentShopItemBinding
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
 import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ShopItemViewModel
+import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ShopItemViewModelFactory
 
 class ShopItemFragment : Fragment() {
 
@@ -53,7 +54,10 @@ class ShopItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         parseParams()
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+        viewModel = ViewModelProvider(
+            this,
+            ShopItemViewModelFactory(requireActivity().application)
+        )[ShopItemViewModel::class.java]
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()

@@ -1,9 +1,11 @@
 package ru.kalievmars.shoppinglistapp.presentation.viewmodel
 
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import ru.kalievmars.shoppinglistapp.data.repository.ShopListRepositoryImpl
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
 import ru.kalievmars.shoppinglistapp.domain.usecase.AddShopItemUseCase
@@ -11,13 +13,16 @@ import ru.kalievmars.shoppinglistapp.domain.usecase.EditShopItemUseCase
 import ru.kalievmars.shoppinglistapp.domain.usecase.GetShopItemUseCase
 import java.lang.Exception
 
-class ShopItemViewModel : ViewModel(), LifecycleObserver {
+class ShopItemViewModel(
+    application: Application
+) : ViewModel(), LifecycleObserver {
 
-    private val repositoryImpl = ShopListRepositoryImpl
+    private val repositoryImpl = ShopListRepositoryImpl(application)
 
     private val getShopItemUseCase = GetShopItemUseCase(shopListRepository = repositoryImpl)
     private val editShopItemUseCase = EditShopItemUseCase(shopListRepository = repositoryImpl)
     private val addShopItemUseCase = AddShopItemUseCase(shopListRepository = repositoryImpl)
+
 
     private val _errorInputName = MutableLiveData<Boolean>()
     val errorInputName: LiveData<Boolean>
@@ -37,7 +42,9 @@ class ShopItemViewModel : ViewModel(), LifecycleObserver {
 
 
     fun getShopItem(shopItemId: Int) {
-        _shopItemLiveData.value = getShopItemUseCase.execute(shopItemId)
+        viewModelScope.launch {
+            _shopItemLiveData.value = getShopItemUseCase.execute(shopItemId)
+        }
     }
 
     fun editShopItem(inputName: String?, inputCount: String?) {
@@ -48,12 +55,15 @@ class ShopItemViewModel : ViewModel(), LifecycleObserver {
 
         if (validate) {
             _shopItemLiveData.value?.let {
-                val item = it.copy(
-                    name = name,
-                    count = count
-                )
-                editShopItemUseCase.execute(item)
-                finishWork()
+
+                viewModelScope.launch {
+                    val item = it.copy(
+                        name = name,
+                        count = count
+                    )
+                    editShopItemUseCase.execute(item)
+                    finishWork()
+                }
             }
         }
     }
@@ -65,14 +75,15 @@ class ShopItemViewModel : ViewModel(), LifecycleObserver {
         val validate = validateInput(name, count)
 
         if (validate) {
-            val shopItem = ShopItem(
-                name = name,
-                count = count,
-                enabled = true
-            )
-
-            addShopItemUseCase.execute(shopItem)
-            finishWork()
+            viewModelScope.launch {
+                val shopItem = ShopItem(
+                    name = name,
+                    count = count,
+                    enabled = true
+                )
+                addShopItemUseCase.execute(shopItem)
+                finishWork()
+            }
         }
     }
 
@@ -90,11 +101,11 @@ class ShopItemViewModel : ViewModel(), LifecycleObserver {
 
     private fun validateInput(name: String, count: Int): Boolean {
         var result = true
-        if(name.isBlank()) {
+        if (name.isBlank()) {
             _errorInputName.value = true
             result = false
         }
-        if(count <= 0) {
+        if (count <= 0) {
             _errorInputCount.value = true
             result = false
         }
@@ -112,5 +123,6 @@ class ShopItemViewModel : ViewModel(), LifecycleObserver {
     private fun finishWork() {
         _activityClosed.value = Unit
     }
+
 
 }

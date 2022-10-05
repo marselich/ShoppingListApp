@@ -5,7 +5,7 @@ import ru.kalievmars.shoppinglistapp.domain.repository.ShopListRepository
 
 class DeleteShopItemUseCase(private val shopListRepository: ShopListRepository) {
 
-    fun execute(shopItem: ShopItem){
+    suspend fun execute(shopItem: ShopItem){
         shopListRepository.deleteShopItem(shopItem)
     }
 

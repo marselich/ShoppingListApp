@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -16,6 +17,7 @@ import ru.kalievmars.shoppinglistapp.presentation.adapters.ShopRecyclerViewAdapt
 import ru.kalievmars.shoppinglistapp.presentation.fragments.ShopItemFragment
 import ru.kalievmars.shoppinglistapp.presentation.utils.SwipeToDelete
 import ru.kalievmars.shoppinglistapp.presentation.viewmodel.MainViewModel
+import ru.kalievmars.shoppinglistapp.presentation.viewmodel.MainViewModelFactory
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnFragmentClosedListener {
 
@@ -28,12 +30,15 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnFragmentClosedListe
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        viewModel = ViewModelProvider(
+            this,
+            MainViewModelFactory(application)
+        )[MainViewModel::class.java]
 
         viewModel.shopList.observe(this) {
             shopAdapter.submitList(it)
         }
-
+        Log.d("MainActivity", "I am here")
         binding.floatingActionButton.setOnClickListener {
             if(isOnePaneMode()) {
                 val intent = ShopItemActivity.newIntentAddItem(this)
@@ -96,6 +101,9 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnFragmentClosedListe
 
     override fun onClosed() {
         Toast.makeText(this, "Success", Toast.LENGTH_LONG).show()
+        Log.d("MainActivity", viewModel.shopList.value.toString())
+        Log.d("MainActivity", "hello")
+        supportFragmentManager.popBackStack()
     }
 
 }

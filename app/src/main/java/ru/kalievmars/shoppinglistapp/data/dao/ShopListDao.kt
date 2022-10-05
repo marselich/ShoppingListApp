@@ -2,24 +2,26 @@ package ru.kalievmars.shoppinglistapp.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import ru.kalievmars.shoppinglistapp.data.ShopItemDbModel
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
 
 @Dao
 interface ShopListDao {
 
     @Query("SELECT * FROM shop_list")
-    fun getShopList(): LiveData<List<ShopItem>>
+    fun getShopList(): LiveData<List<ShopItemDbModel>>
 
-    @Query("SELECT * FROM shop_list WHERE id == :shopItemId")
-    fun getShopItem(shopItemId: Int): ShopItem
+    @Query("SELECT * FROM shop_list WHERE id == :shopItemId LIMIT 1")
+    fun getShopItem(shopItemId: Int): ShopItemDbModel
 
-    @Insert
-    fun insertShopItem(shopItem: ShopItem)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) // is also Update with onConflict
+    fun insertShopItem(ShopItemDbModel: ShopItemDbModel)
 
-    @Delete
-    fun deleteShopItem(shopItem: ShopItem)
+//    @Delete
+//    fun deleteShopItem(ShopItemDbModel: ShopItemDbModel)
 
-    @Update
-    fun updateShopItem(shopItem: ShopItem)
+    @Query("DELETE FROM shop_list WHERE id=:shopItemId")
+    fun deleteShopItem(shopItemId: Int)
+
 
 }

@@ -2,38 +2,52 @@ package ru.kalievmars.shoppinglistapp.presentation.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.kalievmars.shoppinglistapp.R
 import ru.kalievmars.shoppinglistapp.databinding.ActivityMainBinding
+import ru.kalievmars.shoppinglistapp.presentation.ShopApplication
 import ru.kalievmars.shoppinglistapp.presentation.adapters.ShopRecyclerViewAdapter
 import ru.kalievmars.shoppinglistapp.presentation.fragments.ShopItemFragment
 import ru.kalievmars.shoppinglistapp.presentation.utils.SwipeToDelete
 import ru.kalievmars.shoppinglistapp.presentation.viewmodel.MainViewModel
-import ru.kalievmars.shoppinglistapp.presentation.viewmodel.MainViewModelFactory
+import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnFragmentClosedListener {
 
-    private lateinit var viewModel: MainViewModel
-    private lateinit var shopAdapter: ShopRecyclerViewAdapter
-    private lateinit var binding: ActivityMainBinding
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[MainViewModel::class.java]
+    }
+
+    private val component by lazy {
+        (application as ShopApplication).component
+    }
+
+    private val shopAdapter by lazy {
+        ShopRecyclerViewAdapter()
+    }
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
+
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
-        viewModel = ViewModelProvider(
-            this,
-            MainViewModelFactory(application)
-        )[MainViewModel::class.java]
 
         viewModel.shopList.observe(this) {
             shopAdapter.submitList(it)
@@ -64,7 +78,6 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnFragmentClosedListe
 
 
     private fun setupRecyclerView() {
-        shopAdapter = ShopRecyclerViewAdapter()
         shopAdapter.onShopItemSwipeLeftListener = {
             viewModel.deleteShopItem(it)
         }

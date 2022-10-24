@@ -7,20 +7,31 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import ru.kalievmars.shoppinglistapp.R
 import ru.kalievmars.shoppinglistapp.databinding.FragmentShopItemBinding
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
+import ru.kalievmars.shoppinglistapp.presentation.ShopApplication
 import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ShopItemViewModel
-import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ShopItemViewModelFactory
+import ru.kalievmars.shoppinglistapp.presentation.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
-class ShopItemFragment : Fragment() {
+class ShopItemFragment: Fragment() {
 
-    private lateinit var viewModel: ShopItemViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory,
+        )[ShopItemViewModel::class.java]
+    }
+
+    private val component by lazy {
+        (requireActivity().application as ShopApplication).component
+    }
+
     private var _binding: FragmentShopItemBinding? = null
     private val binding: FragmentShopItemBinding
         get() = _binding
@@ -32,6 +43,8 @@ class ShopItemFragment : Fragment() {
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
     override fun onAttach(context: Context) {
+        component.inject(this)
+
         super.onAttach(context)
 
         if(context is OnFragmentClosedListener) {
@@ -54,10 +67,6 @@ class ShopItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         parseParams()
-        viewModel = ViewModelProvider(
-            this,
-            ShopItemViewModelFactory(requireActivity().application)
-        )[ShopItemViewModel::class.java]
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()

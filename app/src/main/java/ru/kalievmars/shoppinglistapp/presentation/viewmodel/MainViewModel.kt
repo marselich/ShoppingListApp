@@ -1,35 +1,20 @@
 package ru.kalievmars.shoppinglistapp.presentation.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import ru.kalievmars.shoppinglistapp.data.repository.ShopListRepositoryImpl
 import ru.kalievmars.shoppinglistapp.domain.models.ShopItem
-import ru.kalievmars.shoppinglistapp.domain.repository.ShopListRepository
 import ru.kalievmars.shoppinglistapp.domain.usecase.DeleteShopItemUseCase
 import ru.kalievmars.shoppinglistapp.domain.usecase.EditShopItemUseCase
-import ru.kalievmars.shoppinglistapp.domain.usecase.GetShopItemUseCase
 import ru.kalievmars.shoppinglistapp.domain.usecase.GetShopListUseCase
+import javax.inject.Inject
 
-class MainViewModel(
-    application: Application
+class MainViewModel @Inject constructor(
+    private val deleteShopItemUseCase: DeleteShopItemUseCase,
+    private val editShopItemUseCase: EditShopItemUseCase,
+    private val getShopListUseCase: GetShopListUseCase,
 ) : ViewModel(), LifecycleObserver {
-
-//    private val shopListRepositoryImpl: ShopListRepository =
-//        ShopListRepositoryImpl(context = app.applicationContext)
-
-    private val shopListRepositoryImpl = ShopListRepositoryImpl(application)
-
-    private val deleteShopItemUseCase =
-        DeleteShopItemUseCase(shopListRepository = shopListRepositoryImpl)
-    private val editShopItemUseCase =
-        EditShopItemUseCase(shopListRepository = shopListRepositoryImpl)
-    private val getShopListUseCase =
-        GetShopListUseCase(shopListRepository = shopListRepositoryImpl)
-
 
     val shopList = getShopListUseCase.execute()
 

@@ -4,9 +4,8 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.synchronized
 import ru.kalievmars.shoppinglistapp.data.dao.ShopListDao
+
 
 
 @Database(entities = [ShopItemDbModel::class], version = 1, exportSchema = false)
@@ -14,7 +13,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getShopListDao(): ShopListDao
 
-    @InternalCoroutinesApi
     companion object {
 
         private var INSTANCE: AppDatabase? = null
